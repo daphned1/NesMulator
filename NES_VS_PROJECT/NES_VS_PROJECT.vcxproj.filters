@@ -24,10 +24,10 @@
     <ClCompile Include="../src/main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ppu2C02.cpp">
+    <ClCompile Include="..\src\ppu2C02.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="cartridge.cpp">
+    <ClCompile Include="..\src\cartridge.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -41,10 +41,10 @@
     <ClInclude Include="..\include\olcPixelGameEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ppu2C02.h">
+    <ClInclude Include="..\include\ppu2C02.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="cartridge.h">
+    <ClInclude Include="..\include\cartridge.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
