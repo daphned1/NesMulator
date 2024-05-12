@@ -104,6 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>../include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -130,11 +131,15 @@
     <ClCompile Include="../src/bus.cpp" />
     <ClCompile Include="../src/CPU6502.cpp" />
     <ClCompile Include="../src/main.cpp" />
+    <ClCompile Include="cartridge.cpp" />
+    <ClCompile Include="ppu2C02.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="../include/bus.h" />
     <ClInclude Include="../include/CPU6502.h" />
-    <ClInclude Include="../include/GameEngine.h" />
+    <ClInclude Include="..\include\olcPixelGameEngine.h" />
+    <ClInclude Include="cartridge.h" />
+    <ClInclude Include="ppu2C02.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

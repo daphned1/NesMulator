@@ -2,7 +2,7 @@
 
 Bus::Bus() {
     // clear ram
-    for (auto &i : ram) {
+    for (auto &i : cRam) {
         i = 0x00;
     }
 
@@ -15,17 +15,39 @@ Bus::~Bus() {
 
 }
 
-uint8_t Bus::read(uint16_t address, bool read) {
-    if (address >= 0x0000 && address < 0xFFFF) {
-        return ram[address];
+uint8_t Bus::cRead(uint16_t address, bool read) {
+    uint8_t data = 0x00;
+
+    if (address >= 0x0000 && address <= 0x1FFF) { //8kb range
+        data = cRam[address & 0x07FF];
+    }
+    else if (address >= 0x2000 && address <= 0x3FFF) {
+        data = ppu.cRead(address & 0x0007);
     }
 
-    return 0x00; 
+    return data;
 }
 
-void Bus::write(uint16_t address, uint8_t val) {
+void Bus::cWrite(uint16_t address, uint8_t val) {
     // full range 
-    if (address >= 0x0000 && address < 0xFFFF) {
-        ram[address] = val;
+    if (address >= 0x0000 && address <= 0x1FFF) { //8kb range
+        cRam[address & 0x07FF] = val;
     }
+    else if (address >= 0x2000 && address <= 0x3FFF) {
+        ppu.cWrite(address & 0x0007, val);
+    }
+}
+
+void Bus::insertCart(const std::shared_ptr<cartridge>& cartr) {
+    this->cart = cartr;
+    ppu.connectCart(cartr);
+}
+
+void Bus::reset() {
+    cpu.reset();
+    systemClcCounter = 0;
+}
+
+void Bus::clock()
+{
 }
