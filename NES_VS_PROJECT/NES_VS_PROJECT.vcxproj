@@ -132,12 +132,16 @@
     <ClCompile Include="../src/CPU6502.cpp" />
     <ClCompile Include="../src/main.cpp" />
     <ClCompile Include="..\src\cartridge.cpp" />
+    <ClCompile Include="..\src\mapper.cpp" />
+    <ClCompile Include="..\src\mapper_000.cpp" />
     <ClCompile Include="..\src\ppu2C02.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="../include/bus.h" />
     <ClInclude Include="../include/CPU6502.h" />
     <ClInclude Include="..\include\cartridge.h" />
+    <ClInclude Include="..\include\mapper.h" />
+    <ClInclude Include="..\include\mapper_000.h" />
     <ClInclude Include="..\include\olcPixelGameEngine.h" />
     <ClInclude Include="..\include\ppu2C02.h" />
   </ItemGroup>

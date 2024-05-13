@@ -1,76 +1,3 @@
-/*
-	olc6502 - An emulation of the 6502/2A03 processor
-	"Thanks Dad for believing computers were gonna be a big deal..." - javidx9
-
-	License (OLC-3)
-	~~~~~~~~~~~~~~~
-
-	Copyright 2018-2019 OneLoneCoder.com
-
-	Redistribution and use in source and binary forms, with or without
-	modification, are permitted provided that the following conditions
-	are met:
-
-	1. Redistributions or derivations of source code must retain the above
-	copyright notice, this list of conditions and the following disclaimer.
-
-	2. Redistributions or derivative works in binary form must reproduce
-	the above copyright notice. This list of conditions and the following
-	disclaimer must be reproduced in the documentation and/or other
-	materials provided with the distribution.
-
-	3. Neither the name of the copyright holder nor the names of its
-	contributors may be used to endorse or promote products derived
-	from this software without specific prior written permission.
-
-	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-	"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-	LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-	A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-	HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-	SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-	LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-	DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-	THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-	OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-	Background
-	~~~~~~~~~~
-	I love this microprocessor. It was at the heart of two of my favourite
-	machines, the BBC Micro, and the Nintendo Entertainment System, as well
-	as countless others in that era. I learnt to program on the Model B, and
-	I learnt to love games on the NES, so in many ways, this processor is
-	why I am the way I am today.
-
-	In February 2019, I decided to undertake a selfish personal project and
-	build a NES emulator. Ive always wanted to, and as such I've avoided
-	looking at source code for such things. This made making this a real
-	personal challenge. I know its been done countless times, and very likely
-	in far more clever and accurate ways than mine, but I'm proud of this.
-
-	Datasheet: http://archive.6502.org/datasheets/rockwell_r650x_r651x.pdf
-
-	Files: olc6502.h, olc6502.cpp
-
-	Relevant Video: https://youtu.be/8XmxKPJDGU0
-
-	Links
-	~~~~~
-	YouTube:	https://www.youtube.com/javidx9
-				https://www.youtube.com/javidx9extra
-	Discord:	https://discord.gg/WhwHUMV
-	Twitter:	https://www.twitter.com/javidx9
-	Twitch:		https://www.twitch.tv/javidx9
-	GitHub:		https://www.github.com/onelonecoder
-	Patreon:	https://www.patreon.com/javidx9
-	Homepage:	https://www.onelonecoder.com
-
-	Author
-	~~~~~~
-	David Barr, aka javidx9, ©OneLoneCoder 2019
-*/
-
 #include <iostream>
 #include <sstream>
 
@@ -87,8 +14,13 @@ class Demo_olc6502 : public olc::PixelGameEngine
 public:
 	Demo_olc6502() { sAppName = "olc6502 Demonstration"; }
 
+private: 
+	std::shared_ptr<cartridge> cart;
 	Bus nes;
 	std::map<uint16_t, std::string> mapAsm;
+
+	bool emulationRun = false;
+	float residualT = 0.0f;
 
 	std::string hex(uint32_t n, uint8_t d)
 	{
@@ -106,7 +38,7 @@ public:
 			std::string sOffset = "$" + hex(nAddr, 4) + ":";
 			for (int col = 0; col < nColumns; col++)
 			{
-				sOffset += " " + hex(nes.read(nAddr, true), 2);
+				sOffset += " " + hex(nes.cRead(nAddr, true), 2);
 				nAddr += 1;
 			}
 			DrawString(nRamX, nRamY, sOffset);
@@ -167,48 +99,22 @@ public:
 
 	bool OnUserCreate()
 	{
-		// Load Program (assembled at https://www.masswerk.at/6502/assembler.html)
-		/*
-			*=$8000
-			LDX #10
-			STX $0000
-			LDX #3
-			STX $0001
-			LDY $0000
-			LDA #0
-			CLC
-			loop
-			ADC $0001
-			DEY
-			BNE loop
-			STA $0002
-			NOP
-			NOP
-			NOP
-		*/
+		// load cartridge
+		cart = std::make_shared<cartridge>("../nestest.nes");
 
-		// Convert hex string into bytes for RAM
-		std::stringstream ss;
-		ss << "A2 0A 8E 00 00 A2 03 8E 01 00 AC 00 00 A9 00 18 6D 01 00 88 D0 FA 8D 02 00 EA EA EA";
-		uint16_t nOffset = 0x8000;
-		while (!ss.eof())
-		{
-			std::string b;
-			ss >> b;
-			nes.ram[nOffset++] = (uint8_t)std::stoul(b, nullptr, 16);
+		if (!cart->ImageValid()) {
+			return false;
 		}
 
-		// Set Reset Vector
-		nes.ram[0xFFFC] = 0x00;
-		nes.ram[0xFFFD] = 0x80;
+		//insert into nes
+		nes.insertCart(cart);
 
-		// Dont forget to set IRQ and NMI vectors if you want to play with those
-
-		// Extract dissassembly
+		// extract disassembly
 		mapAsm = nes.cpu.disassemble(0x0000, 0xFFFF);
 
-		// Reset
-		nes.cpu.reset();
+		// reset nes
+		nes.reset();
+
 		return true;
 	}
 
@@ -216,32 +122,61 @@ public:
 	{
 		Clear(olc::DARK_BLUE);
 
+		if (emulationRun) {
+			if (residualT > 0.0f) {
+				residualT -= fElapsedTime;
+			}
+			else {
+				residualT += (1.0f / 60.0f) - fElapsedTime;
+				do {
+					nes.clock();
+				} while (!nes.ppu.frameComplete);
+				nes.ppu.frameComplete = false;
+			}
+		}
+		else {
 
-		if (GetKey(olc::Key::SPACE).bPressed)
-		{
-			do
-			{
-				nes.cpu.clock();
-			} while (!nes.cpu.complete());
+			// emulate code step by step
+			if (GetKey(olc::Key::C).bPressed) {
+				// clock enough times to execute a whole CPU instruction
+				do {
+					nes.clock();
+				} while (!nes.cpu.complete());
+
+				// cpu clock runs slower than system clock -> may have completed for additional system clock cycles
+				// drain it out
+				do {
+					nes.clock();
+				} while (nes.cpu.complete());
+			}
+
+			// emulate the whole frame
+			if (GetKey(olc::Key::F).bPressed) {
+				// clock enough times to draw a frame
+				do {
+					nes.clock();
+				} while (!nes.ppu.frameComplete);
+
+				// use residual clock cycles to complete current instruction
+				do {
+					nes.clock();
+				} while (!nes.cpu.complete());
+				// reset frame completion flag
+				nes.ppu.frameComplete = false;
+			}
+		}
+		if (GetKey(olc::Key::R).bPressed) {
+			nes.reset();
 		}
 
-		if (GetKey(olc::Key::R).bPressed)
-			nes.cpu.reset();
+		if (GetKey(olc::Key::SPACE).bPressed) {
+			emulationRun = !emulationRun;
+		}
 
-		if (GetKey(olc::Key::I).bPressed)
-			nes.cpu.interruptRequest();
+		DrawCpu(516, 2);
+		DrawCode(516, 72, 26);
 
-		if (GetKey(olc::Key::N).bPressed)
-			nes.cpu.nonmaskable();
-
-		// Draw Ram Page 0x00		
-		DrawRam(2, 2, 0x0000, 16, 16);
-		DrawRam(2, 182, 0x8000, 16, 16);
-		DrawCpu(448, 2);
-		DrawCode(448, 72, 26);
-
-
-		DrawString(10, 370, "SPACE = Step Instruction    R = RESET    I = IRQ    N = NMI");
+		DrawSprite(0, 0, &nes.ppu.GetScreen(), 2);
 
 		return true;
 	}

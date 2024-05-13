@@ -20,7 +20,7 @@ public:
 
     ppu2C02 ppu;
 
-    std::array<uint8_t, 2048> cRam;
+    uint8_t cRam[2048];
 
     // the cartridge
     std::shared_ptr<cartridge> cart;
