@@ -153,7 +153,37 @@ uint8_t ppu2C02::pRead(uint16_t address, bool readonly) {
     address &= 0x3FFF;
 
     if (cart->pRead(address, data)) {
+        
+    }
+    else if (address >= 0x0000 && address <= 0x1FFF) { // pattern memory
+        // read from pattern memory
+        // 1st dimension: chooses whether its the left/right hand side of that array of data
+        // chooses by examining the msb of the ppu address
+        data = pattern[(address & 0x1000) >> 12][address & 0x0FFF];
+    }
+    else if (address >= 0x2000 && address <= 0x3EFF) { // name table memory
 
+    }
+    else if (address >= 0x3F00 && address <= 0x3FFF) { // palette memory
+        // select appropriate index by masking the bottom 5 bits
+        address &= 0x001F;
+
+        // mirroring
+        if (address == 0x0010) {
+            address = 0x0000;
+        }
+        if (address == 0x0014) {
+            address = 0x0004;
+        }
+        if (address == 0x0018) {
+            address = 0x0008;
+        }
+        if (address == 0x001C) {
+            address = 0x000C;
+        }
+
+        // read directly from memory location
+        data = palette[address];
     }
 
     return data;
@@ -164,6 +194,33 @@ void ppu2C02::pWrite(uint16_t address, uint8_t data) {
 
     if (cart->pWrite(address, data)) {
 
+    }
+    else if (address >= 0x0000 && address <= 0x1FFF) { // pattern memory
+        pattern[(address & 0x1000) >> 12][address & 0x0FFF] = data;
+    }
+    else if (address >= 0x2000 && address <= 0x3EFF) { // name table memory
+
+    }
+    else if (address >= 0x3F00 && address <= 0x3FFF) { // palette memory
+        // select appropriate index by masking the bottom 5 bits
+        address &= 0x001F;
+
+        // mirroring
+        if (address == 0x0010) {
+            address = 0x0000;
+        }
+        if (address == 0x0014) {
+            address = 0x0004;
+        }
+        if (address == 0x0018) {
+            address = 0x0008;
+        }
+        if (address == 0x001C) {
+            address = 0x000C;
+        }
+
+        // write directly from memory location
+        palette[address] = data;
     }
 }
 
@@ -198,7 +255,38 @@ olc::Sprite& ppu2C02::GetNameTable(uint8_t x)
     return *spriteNameTable[x];
 }
 
-olc::Sprite& ppu2C02::GetPatternTable(uint8_t x)
+olc::Sprite& ppu2C02::GetPatternTable(uint8_t x, uint8_t palette)
 {
+    for (uint16_t tileY = 0; tileY < 16; tileY++) {
+        for (uint16_t tileX = 0; tileX < 16; tileX++) {
+            // 256 bc a single tile consist of 16 bytes (16 x 16
+            uint16_t offset = tileY * 256 + tileX * 16;
+
+            // each tile has 8 rows of 8 pixels
+            for (uint16_t row = 0; row < 8; row++) {
+                
+                uint8_t lsbTile = pRead(x * 0x1000 + offset + row + 0);
+                uint8_t msbTile = pRead(x * 0x1000 + offset + row + 8);
+
+                for (uint16_t col = 0; col < 8; col++) {
+                    // combine bytes by adding
+                    uint8_t pixel = (lsbTile & 0x01) + (msbTile & 0x01); // adding lsb of each byte to get a value between 0-3
+                    lsbTile >>= 1;
+                    msbTile >>= 1;
+
+                    spritePatternTable[x]->SetPixel(
+                        tileX * 8 + (7 - col),
+                        tileY * 8 + row,
+                        getColorFromPalette(palette, pixel)
+                    );
+                }
+            }
+        }
+    }
     return *spritePatternTable[x];
+}
+
+olc::Pixel& ppu2C02::getColorFromPalette(uint8_t palette, uint8_t pixel) {
+    // take palette id and multiply by 4
+    return paletteScreen[pRead(0x3F00 + (palette >> 2) + pixel)];
 }

@@ -22,6 +22,8 @@ private:
 	bool emulationRun = false;
 	float residualT = 0.0f;
 
+	uint8_t selectedPalette = 0x00; // allow user to choose which palette is being used to draw the pattern table
+
 	std::string hex(uint32_t n, uint8_t d)
 	{
 		std::string s(d, '0');
@@ -173,8 +175,25 @@ private:
 			emulationRun = !emulationRun;
 		}
 
+		if (GetKey(olc::Key::P).bPressed) {
+			// increments and wrap it around
+			(++selectedPalette) &= 0x07;
+		}
+
 		DrawCpu(516, 2);
 		DrawCode(516, 72, 26);
+
+		const int swatchSize = 6;
+		for (int p = 0; p < 8; p++) { // for each palette
+			for (int s = 0; s < 4; s++) { // for each index
+				FillRect(516 + p * (swatchSize * 5) + s * swatchSize, 340, swatchSize, swatchSize, nes.ppu.getColorFromPalette(p, s));
+			}
+		}
+
+		DrawRect(516 + selectedPalette * (swatchSize * 5) - 1, 339, (swatchSize * 4), swatchSize, olc::WHITE);
+
+		DrawSprite(516, 348, &nes.ppu.GetPatternTable(0, selectedPalette));
+		DrawSprite(648, 348, &nes.ppu.GetPatternTable(1, selectedPalette));
 
 		DrawSprite(0, 0, &nes.ppu.GetScreen(), 2);
 

@@ -49,8 +49,10 @@ public:
 	// debuggin
 	olc::Sprite& GetScreen();
 	olc::Sprite& GetNameTable(uint8_t x);
-	olc::Sprite& GetPatternTable(uint8_t x);
+	olc::Sprite& GetPatternTable(uint8_t x, uint8_t palette);
 	bool frameComplete = false; 
+
+	olc::Pixel& getColorFromPalette(uint8_t palette, uint8_t pixel);
 
 private:
 	uint16_t scanline = 0; // row on screen
