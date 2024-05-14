@@ -44,5 +44,7 @@ public:
 	// comm w/ ppu bus
 	bool pRead(uint16_t address, uint8_t &data);
 	bool pWrite(uint16_t address, uint8_t data);
+
+	void reset();
 };
 

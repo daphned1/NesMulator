@@ -8,6 +8,10 @@ mapper_000::~mapper_000()
 {
 }
 
+void mapper_000::reset() {
+
+}
+
 bool mapper_000::CPUMapRead(uint16_t address, uint32_t &mappedAddr)
 {
 	//cartridge only interested in in the range 0x8000 - 0xFFFF
@@ -23,7 +27,7 @@ bool mapper_000::CPUMapRead(uint16_t address, uint32_t &mappedAddr)
 	return false;
 }
 
-bool mapper_000::CPUMapWrite(uint16_t address, uint32_t &mappedAddr)
+bool mapper_000::CPUMapWrite(uint16_t address, uint32_t &mappedAddr, uint8_t data)
 {
 	//cartridge only interested in in the range 0x8000 - 0xFFFF
 	if (address >= 0x8000 && address <= 0xFFFF) {

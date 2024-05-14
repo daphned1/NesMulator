@@ -13,6 +13,8 @@ cartridge::cartridge(const std::string& filename) {
 		char unused[5];
 	} header;
 
+	imageValid = false;
+
 	std::ifstream ifs;
 	ifs.open(filename, std::ifstream::binary);
 	if (ifs.is_open()) {
@@ -43,7 +45,13 @@ cartridge::cartridge(const std::string& filename) {
 
 			// do same for char memory
 			CHRBanks = header.CHRRom_chunks;
-			CHRMemory.resize(CHRBanks * 8192);
+			if (CHRBanks == 0) {
+				CHRMemory.resize(8192); // create CHR ram
+			}
+			else {
+				// allocate for rom
+				CHRMemory.resize(CHRBanks * 8192);
+			}
 			ifs.read((char*)CHRMemory.data(), CHRMemory.size());
 		}
 
@@ -90,7 +98,7 @@ bool cartridge::cWrite(uint16_t address, uint8_t data)
 {
 	uint32_t mapped_addr = 0;
 	// only transformed if the corresponding mapper routine says the info needs to come from cartridge
-	if (mapper_ptr->CPUMapWrite(address, mapped_addr)) {
+	if (mapper_ptr->CPUMapWrite(address, mapped_addr, data)) {
 		PRGMemory[mapped_addr] = data; // access data
 		return true;
 	}
@@ -122,5 +130,11 @@ bool cartridge::pWrite(uint16_t address, uint8_t data)
 	}
 	else {
 		return false;
+	}
+}
+
+void cartridge::reset() {
+	if (mapper_ptr != nullptr) {
+		mapper_ptr->reset();
 	}
 }

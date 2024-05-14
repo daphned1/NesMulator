@@ -102,7 +102,7 @@ private:
 	bool OnUserCreate()
 	{
 		// load cartridge
-		cart = std::make_shared<cartridge>("../nestest.nes");
+		cart = std::make_shared<cartridge>("../games/Super_mario_brothers.nes");
 
 		if (!cart->ImageValid()) {
 			return false;
@@ -197,6 +197,13 @@ private:
 
 		DrawSprite(0, 0, &nes.ppu.GetScreen(), 2);
 
+		// draw ids (for testing)
+		//for (uint8_t y = 0; y < 30; y++) {
+		//	for (uint8_t x = 0; x < 32; x++) {
+		//		DrawString(x * 16, y * 16, hex((uint32_t)nes.ppu.nameTable[0][y * 32 + x], 2));
+		//	}
+		//}
+
 		return true;
 	}
 };
@@ -208,7 +215,7 @@ private:
 int main()
 {
 	Demo_olc6502 demo;
-	demo.Construct(680, 480, 2, 2);
+	demo.Construct(780, 480, 2, 2);
 	demo.Start();
 	return 0;
 }

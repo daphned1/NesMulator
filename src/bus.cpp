@@ -51,7 +51,9 @@ void Bus::insertCart(const std::shared_ptr<cartridge>& cartr) {
 }
 
 void Bus::reset() {
+    cart->reset();
     cpu.reset();
+    ppu.reset();
     systemClcCounter = 0;
 }
 
@@ -62,5 +64,11 @@ void Bus::clock()
     if (systemClcCounter % 3 == 0) {
         cpu.clock();
     }
+
+    if (ppu.nmi) {
+        ppu.nmi = false;
+        cpu.nonmaskable();
+    }
+
     systemClcCounter++;
 }
