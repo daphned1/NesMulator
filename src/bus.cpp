@@ -26,6 +26,11 @@ uint8_t Bus::cRead(uint16_t address, bool read) {
     else if (address >= 0x2000 && address <= 0x3FFF) {
         data = ppu.cRead(address & 0x0007, read);
     }
+    else if (address >= 0x4016 && address <= 0x4017) {
+        // return the msb
+        data = (ctrller_state[address & 0x0001] & 0x80) > 0;
+        ctrller_state[address & 0x0001] <<= 1;
+    }
 
     return data;
 }
@@ -42,6 +47,11 @@ void Bus::cWrite(uint16_t address, uint8_t val) {
     }
     else if (address >= 0x2000 && address <= 0x3FFF) {
         ppu.cWrite(address & 0x0007, val);
+    }
+    else if (address >= 0x4016 && address <= 0x4017) {
+        // takes a snapshot of the controller input
+        // crtller_state = shift register
+        ctrller_state[address & 0x0001] = controller[address & 0x0001];
     }
 }
 

@@ -25,6 +25,8 @@ public:
     // the cartridge
     std::shared_ptr<cartridge> cart;
 
+    uint8_t controller[2]; // stores the instantaneous state of both controllers 
+
 public:
     // system interface
     void insertCart(const std::shared_ptr<cartridge>& cartridge);
@@ -33,4 +35,6 @@ public:
 
 private:
     uint32_t systemClcCounter = 0;
+
+    uint8_t ctrller_state[2]; //snapshot of input
 };
