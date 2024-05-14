@@ -7,10 +7,10 @@ public:
 
 public:
 	//mappers are abstract based class
-	bool CPUMapRead(uint16_t address, uint32_t& mappedAddr) override;
-	bool CPUMapWrite(uint16_t address, uint32_t& mappedAddr, uint8_t data = 0) override;
-	bool PPUMapRead(uint16_t address, uint32_t& mappedAddr) override;
-	bool PPUMapWrite(uint16_t address, uint32_t& mappedAddr) override;
+	bool CPUMapRead(uint16_t address, uint32_t &mappedAddr) override;
+	bool CPUMapWrite(uint16_t address, uint32_t &mappedAddr, uint8_t data = 0) override;
+	bool PPUMapRead(uint16_t address, uint32_t &mappedAddr) override;
+	bool PPUMapWrite(uint16_t address, uint32_t &mappedAddr) override;
 	void reset() override;
 };
 

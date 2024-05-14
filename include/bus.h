@@ -37,4 +37,12 @@ private:
     uint32_t systemClcCounter = 0;
 
     uint8_t ctrller_state[2]; //snapshot of input
+
+    // dma
+    uint8_t dmaPage = 0x00;
+    uint8_t dmaAddr = 0x00;
+    uint8_t dmaData = 0x00; // represent data in transit
+
+    bool dmaTransfer = false;
+    bool dmaDummy = true;
 };

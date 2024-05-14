@@ -48,6 +48,11 @@ void Bus::cWrite(uint16_t address, uint8_t val) {
     else if (address >= 0x2000 && address <= 0x3FFF) {
         ppu.cWrite(address & 0x0007, val);
     }
+    else if (address == 0x4014) {
+        dmaPage = val; // page address
+        dmaAddr = 0x00; // set low byte of 16-bit address to 0
+        dmaTransfer = true;
+    }
     else if (address >= 0x4016 && address <= 0x4017) {
         // takes a snapshot of the controller input
         // crtller_state = shift register
@@ -65,6 +70,11 @@ void Bus::reset() {
     cpu.reset();
     ppu.reset();
     systemClcCounter = 0;
+    dmaPage = 0x00;
+    dmaAddr = 0x00;
+    dmaData = 0x00;
+    dmaDummy = true;
+    dmaTransfer = false;
 }
 
 void Bus::clock()
@@ -72,7 +82,32 @@ void Bus::clock()
     ppu.clock();
     // cpu clock runs 3x slower than ppu
     if (systemClcCounter % 3 == 0) {
-        cpu.clock();
+        if (dmaTransfer) {
+            if (dmaDummy) {
+                if (systemClcCounter % 2 == 1) {
+                    dmaDummy = false;
+                }
+            }
+            else {
+                if (systemClcCounter % 2 == 0) {
+                    // read data from cpu 
+                    dmaData = cRead(dmaPage << 8 | dmaAddr);
+                }
+                else {
+                    // write to ppu oam
+                    ppu.OAM_ptr[dmaAddr] = dmaData;
+                    dmaAddr++;
+
+                    if (dmaAddr == 0x00) {
+                        dmaTransfer = false;
+                        dmaDummy = true;
+                    }
+                }
+            }
+        }
+        else {
+            cpu.clock();
+        }
     }
 
     if (ppu.nmi) {

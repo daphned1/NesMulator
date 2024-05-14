@@ -107,7 +107,7 @@ private:
 		if (!cart->ImageValid()) {
 			return false;
 		}
-
+		
 		//insert into nes
 		nes.insertCart(cart);
 
@@ -126,14 +126,27 @@ private:
 
 		// controller
 		nes.controller[0] = 0x00;
-		nes.controller[0] |= GetKey(olc::Key::X).bHeld ? 0x80 : 0x00;
-		nes.controller[0] |= GetKey(olc::Key::Z).bHeld ? 0x40 : 0x00;
-		nes.controller[0] |= GetKey(olc::Key::A).bHeld ? 0x20 : 0x00;
-		nes.controller[0] |= GetKey(olc::Key::S).bHeld ? 0x10 : 0x00;
+		nes.controller[0] |= GetKey(olc::Key::X).bHeld ? 0x80 : 0x00; // A button
+		nes.controller[0] |= GetKey(olc::Key::Z).bHeld ? 0x40 : 0x00; // B button
+		nes.controller[0] |= GetKey(olc::Key::A).bHeld ? 0x20 : 0x00; // Select
+		nes.controller[0] |= GetKey(olc::Key::S).bHeld ? 0x10 : 0x00; // Start
 		nes.controller[0] |= GetKey(olc::Key::UP).bHeld ? 0x08 : 0x00;
 		nes.controller[0] |= GetKey(olc::Key::DOWN).bHeld ? 0x04 : 0x00;
 		nes.controller[0] |= GetKey(olc::Key::LEFT).bHeld ? 0x02 : 0x00;
 		nes.controller[0] |= GetKey(olc::Key::RIGHT).bHeld ? 0x01 : 0x00;
+
+		if (GetKey(olc::Key::R).bPressed) {
+			nes.reset();
+		}
+
+		if (GetKey(olc::Key::SPACE).bPressed) {
+			emulationRun = !emulationRun;
+		}
+
+		if (GetKey(olc::Key::P).bPressed) {
+			// increments and wrap it around
+			(++selectedPalette) &= 0x07;
+		}
 
 		if (emulationRun) {
 			if (residualT > 0.0f) {
@@ -178,21 +191,17 @@ private:
 				nes.ppu.frameComplete = false;
 			}
 		}
-		if (GetKey(olc::Key::R).bPressed) {
-			nes.reset();
-		}
-
-		if (GetKey(olc::Key::SPACE).bPressed) {
-			emulationRun = !emulationRun;
-		}
-
-		if (GetKey(olc::Key::P).bPressed) {
-			// increments and wrap it around
-			(++selectedPalette) &= 0x07;
-		}
 
 		DrawCpu(516, 2);
-		DrawCode(516, 72, 26);
+		//DrawCode(516, 72, 26);
+
+		for (int i = 0; i < 26; i++) {
+			std::string s = hex(i, 2) + ": (" + std::to_string(nes.ppu.OAM_ptr[i * 4 + 3])
+				+ ", " + std::to_string(nes.ppu.OAM_ptr[i * 4 + 0]) + ") "
+				+ "ID: " + hex(nes.ppu.OAM_ptr[i * 4 + 1], 2) +
+				+" AT: " + hex(nes.ppu.OAM_ptr[i * 4 + 2], 2);
+			DrawString(516, 72 + i * 10, s);
+		}
 
 		const int swatchSize = 6;
 		for (int p = 0; p < 8; p++) { // for each palette
