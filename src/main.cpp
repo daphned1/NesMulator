@@ -106,7 +106,7 @@ private:
 	bool OnUserCreate()
 	{
 		// Load the cartridge
-		cart = std::make_shared<cartridge>("../games/nestest.nes");
+		cart = std::make_shared<cartridge>("../games/Kung_fu.nes");
 
 		if (!cart->ImageValid())
 			return false;
@@ -148,8 +148,8 @@ private:
 			else
 			{
 				fResidualTime += (1.0f / 60.0f) - fElapsedTime;
-				do { nes.clock(); } while (!nes.ppu.frameComplete);
-				nes.ppu.frameComplete = false;
+				do { nes.clock(); } while (!nes.ppu.frame_complete);
+				nes.ppu.frame_complete = false;
 			}
 		}
 		else
@@ -170,12 +170,12 @@ private:
 			{
 				// Clock enough times to draw a single frame
 				do { nes.clock(); 
-				} while (!nes.ppu.frameComplete);
+				} while (!nes.ppu.frame_complete);
 				// Use residual clock cycles to complete current instruction
 				do { nes.clock(); 
 				} while (!nes.cpu.complete());
 				// Reset frame completion flag
-				nes.ppu.frameComplete = false;
+				nes.ppu.frame_complete = false;
 			}
 		}
 
@@ -185,10 +185,10 @@ private:
 		// Draw OAM Contents (first 26 out of 64) ======================================
 		for (int i = 0; i < 26; i++)
 		{
-			std::string s = hex(i, 2) + ": (" + std::to_string(nes.ppu.OAM_ptr[i * 4 + 3])
-				+ ", " + std::to_string(nes.ppu.OAM_ptr[i * 4 + 0]) + ") "
-				+ "ID: " + hex(nes.ppu.OAM_ptr[i * 4 + 1], 2) +
-				+" AT: " + hex(nes.ppu.OAM_ptr[i * 4 + 2], 2);
+			std::string s = hex(i, 2) + ": (" + std::to_string(nes.ppu.pOAM[i * 4 + 3])
+				+ ", " + std::to_string(nes.ppu.pOAM[i * 4 + 0]) + ") "
+				+ "ID: " + hex(nes.ppu.pOAM[i * 4 + 1], 2) +
+				+" AT: " + hex(nes.ppu.pOAM[i * 4 + 2], 2);
 			DrawString(516, 72 + i * 10, s);
 		}
 
@@ -200,7 +200,7 @@ private:
 		for (int p = 0; p < 8; p++) // For each palette
 			for (int s = 0; s < 4; s++) // For each index
 				FillRect(516 + p * (nSwatchSize * 5) + s * nSwatchSize, 340,
-					nSwatchSize, nSwatchSize, nes.ppu.getColorFromPalette(p, s));
+					nSwatchSize, nSwatchSize, nes.ppu.GetColorFromPaletteRam(p, s));
 
 		// Draw selection reticule around selected palette
 		DrawRect(516 + nSelectedPalette * (nSwatchSize * 5) - 1, 339, (nSwatchSize * 4), nSwatchSize, olc::WHITE);
