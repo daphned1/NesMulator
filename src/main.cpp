@@ -1,58 +1,3 @@
-/*
-	olc::NES - Part #5 - PPU Rendering - Foregrounds
-	"Thanks Dad for believing computers were gonna be a big deal..." - javidx9
-
-	License (OLC-3)
-	~~~~~~~~~~~~~~~
-
-	Copyright 2018-2019 OneLoneCoder.com
-
-	Redistribution and use in source and binary forms, with or without
-	modification, are permitted provided that the following conditions
-	are met:
-
-	1. Redistributions or derivations of source code must retain the above
-	copyright notice, this list of conditions and the following disclaimer.
-
-	2. Redistributions or derivative works in binary form must reproduce
-	the above copyright notice. This list of conditions and the following
-	disclaimer must be reproduced in the documentation and/or other
-	materials provided with the distribution.
-
-	3. Neither the name of the copyright holder nor the names of its
-	contributors may be used to endorse or promote products derived
-	from this software without specific prior written permission.
-
-	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-	"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-	LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-	A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-	HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-	SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-	LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-	DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-	THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-	OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-
-	Relevant Video: https://youtu.be/cksywUTZxlY
-
-	Links
-	~~~~~
-	YouTube:	https://www.youtube.com/javidx9
-				https://www.youtube.com/javidx9extra
-	Discord:	https://discord.gg/WhwHUMV
-	Twitter:	https://www.twitter.com/javidx9
-	Twitch:		https://www.twitch.tv/javidx9
-	GitHub:		https://www.github.com/onelonecoder
-	Patreon:	https://www.patreon.com/javidx9
-	Homepage:	https://www.onelonecoder.com
-
-	Author
-	~~~~~~
-	David Barr, aka javidx9, ©OneLoneCoder 2019
-*/
 
 #include <iostream>
 #include <sstream>
@@ -68,7 +13,7 @@
 class Demo_olc2C02 : public olc::PixelGameEngine
 {
 public:
-	Demo_olc2C02() { sAppName = "olc2C02 Demonstration"; }
+	Demo_olc2C02() { sAppName = "Demonstration"; }
 
 private:
 	// The NES
@@ -161,7 +106,7 @@ private:
 	bool OnUserCreate()
 	{
 		// Load the cartridge
-		cart = std::make_shared<cartridge>("../games/Super_mario_brothers.nes");
+		cart = std::make_shared<cartridge>("../games/nestest.nes");
 
 		if (!cart->ImageValid())
 			return false;
@@ -203,8 +148,8 @@ private:
 			else
 			{
 				fResidualTime += (1.0f / 60.0f) - fElapsedTime;
-				do { nes.clock(); } while (!nes.ppu.frame_complete);
-				nes.ppu.frame_complete = false;
+				do { nes.clock(); } while (!nes.ppu.frameComplete);
+				nes.ppu.frameComplete = false;
 			}
 		}
 		else
@@ -224,11 +169,13 @@ private:
 			if (GetKey(olc::Key::F).bPressed)
 			{
 				// Clock enough times to draw a single frame
-				do { nes.clock(); } while (!nes.ppu.frame_complete);
+				do { nes.clock(); 
+				} while (!nes.ppu.frameComplete);
 				// Use residual clock cycles to complete current instruction
-				do { nes.clock(); } while (!nes.cpu.complete());
+				do { nes.clock(); 
+				} while (!nes.cpu.complete());
 				// Reset frame completion flag
-				nes.ppu.frame_complete = false;
+				nes.ppu.frameComplete = false;
 			}
 		}
 
@@ -238,19 +185,22 @@ private:
 		// Draw OAM Contents (first 26 out of 64) ======================================
 		for (int i = 0; i < 26; i++)
 		{
-			std::string s = hex(i, 2) + ": (" + std::to_string(nes.ppu.pOAM[i * 4 + 3])
-				+ ", " + std::to_string(nes.ppu.pOAM[i * 4 + 0]) + ") "
-				+ "ID: " + hex(nes.ppu.pOAM[i * 4 + 1], 2) +
-				+" AT: " + hex(nes.ppu.pOAM[i * 4 + 2], 2);
+			std::string s = hex(i, 2) + ": (" + std::to_string(nes.ppu.OAM_ptr[i * 4 + 3])
+				+ ", " + std::to_string(nes.ppu.OAM_ptr[i * 4 + 0]) + ") "
+				+ "ID: " + hex(nes.ppu.OAM_ptr[i * 4 + 1], 2) +
+				+" AT: " + hex(nes.ppu.OAM_ptr[i * 4 + 2], 2);
 			DrawString(516, 72 + i * 10, s);
 		}
+
+		//std::string s = "KEY X == A button KEY Z == B Button KEY A == SELECT KEY S == START KEY UP == UP ARROW KEY DOWN == DOWN ARROW KEY RIGHT == RIGHT ARROW KEY LEFT == LEFT ARROW";
+		//DrawString(516, 72 * 10, s);
 
 		// Draw Palettes & Pattern Tables ==============================================
 		const int nSwatchSize = 6;
 		for (int p = 0; p < 8; p++) // For each palette
 			for (int s = 0; s < 4; s++) // For each index
 				FillRect(516 + p * (nSwatchSize * 5) + s * nSwatchSize, 340,
-					nSwatchSize, nSwatchSize, nes.ppu.GetColorFromPaletteRam(p, s));
+					nSwatchSize, nSwatchSize, nes.ppu.getColorFromPalette(p, s));
 
 		// Draw selection reticule around selected palette
 		DrawRect(516 + nSelectedPalette * (nSwatchSize * 5) - 1, 339, (nSwatchSize * 4), nSwatchSize, olc::WHITE);

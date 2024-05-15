@@ -62,7 +62,7 @@ void Bus::cWrite(uint16_t address, uint8_t val) {
 
 void Bus::insertCart(const std::shared_ptr<cartridge>& cartr) {
     this->cart = cartr;
-    ppu.ConnectCartridge(cartr);
+    ppu.connectCart(cartr);
 }
 
 void Bus::reset() {
@@ -95,7 +95,7 @@ void Bus::clock()
                 }
                 else {
                     // write to ppu oam
-                    ppu.pOAM[dmaAddr] = dmaData;
+                    ppu.OAM_ptr[dmaAddr] = dmaData;
                     dmaAddr++;
 
                     if (dmaAddr == 0x00) {
