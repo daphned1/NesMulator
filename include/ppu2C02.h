@@ -19,18 +19,17 @@ private:
 
 private:
 	olc::Pixel  paletteScrn[0x40];
-	// In Video
+
 	// olc::Sprite sprScreen = olc::Sprite(256, 240);
 	// olc::Sprite sprNameTable[2] = { olc::Sprite(256, 240), olc::Sprite(256, 240) };
 	// olc::Sprite sprPatternTable[2] = { olc::Sprite(128, 128), olc::Sprite(128, 128) };
 
-	// Changed To for API breaking subsequent PGE Update
 	olc::Sprite* sprScrn;
 	olc::Sprite* sprNmTbl[2];
 	olc::Sprite* sprPatternTable[2];
 
 public:
-	// Debugging Utilities
+	// debuggin
 	olc::Sprite& GetScreen();
 	olc::Sprite& GetNameTable(uint8_t i);
 	olc::Sprite& GetPatternTable(uint8_t i, uint8_t palette);
@@ -146,8 +145,7 @@ private:
 
 	// A register to store the address when the CPU manually communicates
 	// with OAM via PPU registers. This is not commonly used because it 
-	// is very slow, and instead a 256-Byte DMA transfer is used. See
-	// the Bus header for a description of this.
+	// is very slow, and instead a 256-Byte DMA transfer is used. 
 	uint8_t oam_addr = 0x00;
 
 

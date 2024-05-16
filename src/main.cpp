@@ -106,7 +106,7 @@ private:
 	bool OnUserCreate()
 	{
 		// Load the cartridge
-		cart = std::make_shared<cartridge>("../games/Kung_fu.nes");
+		cart = std::make_shared<cartridge>("../games/Super_mario_brothers.nes");
 
 		if (!cart->ImageValid())
 			return false;
@@ -180,17 +180,17 @@ private:
 		}
 
 		DrawCpu(516, 2);
-		//DrawCode(516, 72, 26);
+		DrawCode(516, 72, 26);
 
 		// Draw OAM Contents (first 26 out of 64) ======================================
-		for (int i = 0; i < 26; i++)
-		{
-			std::string s = hex(i, 2) + ": (" + std::to_string(nes.ppu.pOAM[i * 4 + 3])
-				+ ", " + std::to_string(nes.ppu.pOAM[i * 4 + 0]) + ") "
-				+ "ID: " + hex(nes.ppu.pOAM[i * 4 + 1], 2) +
-				+" AT: " + hex(nes.ppu.pOAM[i * 4 + 2], 2);
-			DrawString(516, 72 + i * 10, s);
-		}
+		//for (int i = 0; i < 26; i++)
+		//{
+		//	std::string s = hex(i, 2) + ": (" + std::to_string(nes.ppu.pOAM[i * 4 + 3])
+		//		+ ", " + std::to_string(nes.ppu.pOAM[i * 4 + 0]) + ") "
+		//		+ "ID: " + hex(nes.ppu.pOAM[i * 4 + 1], 2) +
+		//		+" AT: " + hex(nes.ppu.pOAM[i * 4 + 2], 2);
+		//	DrawString(516, 72 + i * 10, s);
+		//}
 
 		//std::string s = "KEY X == A button KEY Z == B Button KEY A == SELECT KEY S == START KEY UP == UP ARROW KEY DOWN == DOWN ARROW KEY RIGHT == RIGHT ARROW KEY LEFT == LEFT ARROW";
 		//DrawString(516, 72 * 10, s);
@@ -222,7 +222,7 @@ private:
 int main()
 {
 	Demo_olc2C02 demo;
-	demo.Construct(780, 480, 2, 2);
+	demo.Construct(500, 480, 2, 2);
 	demo.Start();
 	return 0;
 }

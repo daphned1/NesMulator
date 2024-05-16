@@ -1,19 +1,8 @@
 #include "CPU6502.h"
 #include "bus.h"
 
-// Constructor
+// constructor
 CPU6502::CPU6502() {
-	// Assembles the translation table. It's big, it's ugly, but it yields a convenient way
-	// to emulate the 6502. I'm certain there are some "code-golf" strategies to reduce this
-	// but I've deliberately kept it verbose for study and alteration
-
-	// It is 16x16 entries. This gives 256 instructions. It is arranged to that the bottom
-	// 4 bits of the instruction choose the column, and the top 4 bits choose the row.
-
-	// For convenience to get function pointers to members of this class, I'm using this
-	// or else it will be much much larger :D
-
-	// The table is one big initialiser list of initialiser lists...
 	using a = CPU6502;
 	search =
 	{
@@ -169,10 +158,6 @@ void CPU6502::clock() {
 	// Decrement the number of cycles remaining for this instruction
 	cycles--;
 }
-
-
-
-
 
 // FLAG -----------------------------------------
 // returns the specific bit of the status register
@@ -874,10 +859,7 @@ uint8_t CPU6502::LSR()
 
 uint8_t CPU6502::NOP()
 {
-	// Sadly not all NOPs are equal, Ive added a few here
 	// based on https://wiki.nesdev.com/w/index.php/CPU_unofficial_opcodes
-	// and will add more based on game compatibility, and ultimately
-	// I'd like to cover all illegal opcodes too
 	switch (opcode) {
 	case 0x1C:
 	case 0x3C:
@@ -1137,21 +1119,12 @@ uint8_t CPU6502::XXX()
 }
 
 
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-// HELPER FUNCTIONS
-
 bool CPU6502::complete()
 {
 	return cycles == 0;
 }
 
-// This is the disassembly function. Its workings are not required for emulation.
-// It is merely a convenience function to turn the binary instruction code into
-// human readable form. Its included as part of the emulator because it can take
-// advantage of many of the CPUs internal operations to do this.
+// disassembly
 std::map<uint16_t, std::string> CPU6502::disassemble(uint16_t nStart, uint16_t nStop)
 {
 	uint32_t addr = nStart;
@@ -1159,9 +1132,7 @@ std::map<uint16_t, std::string> CPU6502::disassemble(uint16_t nStart, uint16_t n
 	std::map<uint16_t, std::string> mapLines;
 	uint16_t line_addr = 0;
 
-	// A convenient utility to convert variables into
-	// hex strings because "modern C++"'s method with 
-	// streams is atrocious
+	//convert to hex
 	auto hex = [](uint32_t n, uint8_t d)
 		{
 			std::string s(d, '0');
@@ -1169,15 +1140,6 @@ std::map<uint16_t, std::string> CPU6502::disassemble(uint16_t nStart, uint16_t n
 				s[i] = "0123456789ABCDEF"[n & 0xF];
 			return s;
 		};
-
-	// Starting at the specified address we read an instruction
-	// byte, which in turn yields information from the lookup table
-	// as to how many additional bytes we need to read and what the
-	// addressing mode is. I need this info to assemble human readable
-	// syntax, which is different depending upon the addressing mode
-
-	// As the instruction is decoded, a std::string is assembled
-	// with the readable output
 	while (addr <= (uint32_t)nStop)
 	{
 		line_addr = addr;
