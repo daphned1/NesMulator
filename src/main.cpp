@@ -106,7 +106,7 @@ private:
 	bool OnUserCreate()
 	{
 		// Load the cartridge
-		cart = std::make_shared<cartridge>("../games/Super_mario_brothers.nes");
+		cart = std::make_shared<cartridge>("../games/nestest.nes.nes");
 
 		if (!cart->ImageValid())
 			return false;
